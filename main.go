@@ -73,8 +73,9 @@ func print_im() {
 }
 func main() {
 	app := &cli.App{
-		Name:  "EasyStress",
-		Usage: "Send a lot of requests to test a website's stress resistance",
+		Name:    "EasyStress",
+		Usage:   "Send a lot of requests to test a website's stress resistance",
+		Version: "v1.0.0",
 		Flags: []cli.Flag{
 			&cli.IntFlag{
 				Name:     "time",

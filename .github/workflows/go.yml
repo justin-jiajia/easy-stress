@@ -1,0 +1,41 @@
+# This workflow will build a golang project
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-go
+
+name: Go
+
+on:
+  workflow_dispatch:
+  push:
+    tags: "v*.*"
+
+jobs:
+
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up Go
+      uses: actions/setup-go@v3
+
+    - name: Build linux
+      run: |
+        go build main.go
+        mv main easystress_linux
+    
+    - name: Build windows
+      run: |
+        CGO_ENABLED=0
+        GOOS=windows
+        GOARCH=amd64
+        go build main.go
+        mv main easystress_windows.exe
+
+    - name: Release
+      uses: softprops/action-gh-release@v1
+      with:
+        draft: true
+        files: |
+          easystress_windows.exe
+          easystress_linux
+        
