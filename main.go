@@ -72,16 +72,22 @@ func print_im() {
 	}
 }
 func main() {
+	var c int
 	app := &cli.App{
 		Name:    "EasyStress",
 		Usage:   "Send a lot of requests to test a website's stress resistance",
-		Version: "v1.0.0",
+		Version: "v1.1",
 		Flags: []cli.Flag{
+			&cli.BoolFlag{
+				Name:    "licence",
+				Usage:   "Show the licence",
+				Aliases: []string{"l"},
+				Count:   &c,
+			},
 			&cli.IntFlag{
-				Name:     "time",
-				Usage:    "The time of sending requests",
-				Aliases:  []string{"t"},
-				Required: true,
+				Name:    "time",
+				Usage:   "The time of sending requests",
+				Aliases: []string{"t"},
 			},
 			&cli.IntFlag{
 				Name:    "worker",
@@ -97,8 +103,20 @@ func main() {
 			},
 		},
 		Action: func(ctx *cli.Context) error {
+			if c != 0 {
+				fmt.Print(`You should have known that this program is just made for test stress resistance of websites, not for DDOS attack.
+To use this program, you must agree these terms:
+- All the Consequences made by using this program should be borne by you, not by me (the author of this program).
+- You use this program means you agree to all the terms.
+- If you don't agree to these terms, you MUST stop using this program AT ONCE.`)
+				return cli.Exit("", 0)
+			}
 			if ctx.NArg() != 1 {
 				return cli.Exit("Only 1 argument(website) is allowed!", -1)
+			}
+			time_amount = ctx.Int("time")
+			if time_amount == 0 {
+				return cli.Exit("Required flag \"t\" not set", -1)
 			}
 			use_file = ctx.String("file") != ""
 			if use_file {
@@ -127,7 +145,6 @@ func main() {
 			}
 			website = ctx.Args().Get(0)
 			worker_amount := ctx.Int("worker")
-			time_amount = ctx.Int("time")
 			if worker_amount > time_amount {
 				fmt.Println("\033[33mWarning:\033[0m workers more than requests")
 			}
