@@ -38,10 +38,16 @@ func start(this_id int) {
 		_, err := http.Get(website)
 		// resp, err := http.Get(website)
 		time_spend := time.Since(time_start).Abs().Milliseconds()
-		write_mu.Lock()
-		if err != nil {
-			csvwriter.Write([]string{fmt.Sprintf("%f", time.Since(time_startrun).Seconds()), "error", fmt.Sprintf("%d", time_spend)})
+		if use_file {
+			write_mu.Lock()
+			if err != nil {
+				csvwriter.Write([]string{fmt.Sprintf("%f", time.Since(time_startrun).Seconds()), "error", fmt.Sprintf("%d", time_spend)})
+			} else {
+				csvwriter.Write([]string{fmt.Sprintf("%f", time.Since(time_startrun).Seconds()), "success", fmt.Sprintf("%d", time_spend)})
+			}
 			write_mu.Unlock()
+		}
+		if err != nil {
 			time_err++
 			print_mu.Lock()
 			fmt.Print("\033[33mError: \033[0m")
@@ -49,8 +55,6 @@ func start(this_id int) {
 			print_mu.Unlock()
 			// defer resp.Body.Close()
 		} else {
-			csvwriter.Write([]string{fmt.Sprintf("%f", time.Since(time_startrun).Seconds()), "success", fmt.Sprintf("%d", time_spend)})
-			write_mu.Unlock()
 			time_ok++
 			last_time = int(time_spend)
 			time_used += int(time_spend)
@@ -76,7 +80,7 @@ func main() {
 	app := &cli.App{
 		Name:    "EasyStress",
 		Usage:   "Send a lot of requests to test a website's stress resistance",
-		Version: "v1.1",
+		Version: "v1.2",
 		Flags: []cli.Flag{
 			&cli.BoolFlag{
 				Name:    "licence",
@@ -118,6 +122,10 @@ To use this program, you must agree these terms:
 			if time_amount == 0 {
 				return cli.Exit("Required flag \"t\" not set", -1)
 			}
+			website = ctx.Args().Get(0)
+			if website[:8] != "https://" && website[:7] != "http://" {
+				return cli.Exit("Website should start with 'http://' or 'https://'.", -1)
+			}
 			use_file = ctx.String("file") != ""
 			if use_file {
 				file_name = ctx.String("file")
@@ -143,7 +151,6 @@ To use this program, you must agree these terms:
 				csvwriter = csv.NewWriter(file)
 				csvwriter.Write([]string{"FinishTime(s)", "Status", "TimeCost(ms)"})
 			}
-			website = ctx.Args().Get(0)
 			worker_amount := ctx.Int("worker")
 			if worker_amount > time_amount {
 				fmt.Println("\033[33mWarning:\033[0m workers more than requests")
