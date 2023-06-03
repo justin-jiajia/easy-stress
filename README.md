@@ -36,17 +36,18 @@ mv main.exe easystress.exe
 ### Use
 
 ```shell
-easystress -t 100 -w 5 -f t.csv https://example.com
+easystress -t 100 -w 5 -o 3 -f t.csv https://example.com
 ```
 
-This command will open 5 workers to send 100 requests to https://example.com and record to `t.csv`.
+This command will open 5 workers with 3 second timeout to send 100 requests to https://example.com and record to `t.csv`.
 
 ```
 GLOBAL OPTIONS:
-   --licence, -l             Show the licence (default: false)
-   --time value, -t value    The time of sending requests
-   --worker value, -w value  The amount of workers to send requests (default: 4)
-   --file value, -f value    The name of the csv file which contains every request's time and error (default: none)
-   --help, -h                show help
-   --version, -v             print the version
+   --licence, -l              Show the licence (default: false)
+   --timeout value, -o value  The timeout (unit: second) (default: 5)
+   --time value, -t value     The time of sending requests
+   --worker value, -w value   The amount of workers to send requests (default: 4)
+   --file value, -f value     The name of the csv file which contains every request's time and error (default: none)
+   --help, -h                 show help
+   --version, -v              print the version
 ```

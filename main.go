@@ -24,6 +24,7 @@ var (
 	use_file      bool
 	last_time     int
 	file_name     string
+	client        http.Client
 	print_mu      sync.Mutex
 	time_startrun time.Time
 	write_mu      sync.Mutex
@@ -35,7 +36,7 @@ func start(this_id int) {
 	for time_sent < time_amount {
 		time_sent++
 		time_start := time.Now()
-		_, err := http.Get(website)
+		_, err := client.Get(website)
 		// resp, err := http.Get(website)
 		time_spend := time.Since(time_start).Abs().Milliseconds()
 		if use_file {
@@ -80,13 +81,19 @@ func main() {
 	app := &cli.App{
 		Name:    "EasyStress",
 		Usage:   "Send a lot of requests to test a website's stress resistance",
-		Version: "v1.2",
+		Version: "v1.3",
 		Flags: []cli.Flag{
 			&cli.BoolFlag{
 				Name:    "licence",
 				Usage:   "Show the licence",
 				Aliases: []string{"l"},
 				Count:   &c,
+			},
+			&cli.IntFlag{
+				Name:    "timeout",
+				Usage:   "The timeout (unit: second)",
+				Aliases: []string{"o"},
+				Value:   5,
 			},
 			&cli.IntFlag{
 				Name:    "time",
@@ -142,11 +149,12 @@ To use this program, you must agree these terms:
 				}
 				var file *os.File
 				file, err = os.Create(file_name)
-				defer file.Close()
 				if err != nil {
 					fmt.Print("\033[33mError: \033[0m")
 					fmt.Println(err)
 					return cli.Exit("", -1)
+				} else {
+					defer file.Close()
 				}
 				csvwriter = csv.NewWriter(file)
 				csvwriter.Write([]string{"FinishTime(s)", "Status", "TimeCost(ms)"})
@@ -155,6 +163,8 @@ To use this program, you must agree these terms:
 			if worker_amount > time_amount {
 				fmt.Println("\033[33mWarning:\033[0m workers more than requests")
 			}
+			timeout := ctx.Int("timeout")
+			client = http.Client{Timeout: time.Duration(timeout) * time.Second}
 			fmt.Print("\033[33mStarting...\033[0m")
 			fmt.Printf(`
 	target :%s
@@ -175,7 +185,7 @@ To use this program, you must agree these terms:
 			fmt.Print("\r\033[33mFinish!\033[0m")
 			if use_file {
 				csvwriter.Flush()
-				fmt.Print(" Logs saved to", file_name, " as csv")
+				fmt.Print(" Logs saved to ", file_name, " as csv")
 			}
 			fmt.Print("                                                              ")
 			fmt.Printf(`
