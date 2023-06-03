@@ -2,11 +2,11 @@
 
 Send a lot of requests to test a website's stress resistance
 
-**This program is just made for test stress resistance of websites, not for DDOS attack.**
+**This program is just made for test stress resistance of websites, not for DDOS attack.(It means you should only 'attack' the website made by yourself, not others)**
 
 > To use this program, you must agree these terms:
 
-- All the Consequences made by using this program should be borne by you, not by me (the author of this program).
+- All the consequences made by using this program should be borne by you, not by me (the author of this program).
 
 - You use this program means you agree to all the terms.
 
